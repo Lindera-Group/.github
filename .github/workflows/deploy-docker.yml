@@ -75,7 +75,8 @@ jobs:
             --exclude='venv' \
             --exclude='__pycache__' \
             --exclude='*.pyc' \
-            --exclude='.env.local' \
+            --exclude='.env' \
+            --exclude='data' \
             ./ root@$VPS_HOST:/opt/$APP_NAME/
 
           ssh root@$VPS_HOST "cd /opt/$APP_NAME && \
