@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup SSH
         run: |
@@ -54,7 +54,7 @@ jobs:
 
       - name: Setup Node.js
         if: ${{ inputs.build_frontend }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -73,7 +73,7 @@ jobs:
           APP_NAME: ${{ inputs.app_name }}
           COMPOSE_FILE: ${{ inputs.compose_file }}
         run: |
-          rsync -avz --delete \
+          rsync -avz --checksum --delete \
             --exclude='.git' \
             --exclude='node_modules' \
             --exclude='venv' \
@@ -100,5 +100,6 @@ jobs:
           if [ "$HTTP_CODE" = "200" ]; then
             echo "✓ Health check passed (HTTP $HTTP_CODE)"
           else
-            echo "⚠ Health check returned HTTP $HTTP_CODE"
+            echo "✗ Health check failed (HTTP $HTTP_CODE)"
+            exit 1
           fi
