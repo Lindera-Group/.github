@@ -15,6 +15,10 @@ on:
         description: 'Health check endpoint path'
         default: '/health'
         type: string
+      health_url:
+        description: 'Full health check URL (overrides app_name-based URL)'
+        default: ''
+        type: string
       build_frontend:
         description: 'Whether to build frontend before deploy'
         default: false
@@ -77,6 +81,7 @@ jobs:
             --exclude='*.pyc' \
             --exclude='.env' \
             --exclude='data' \
+            --exclude='backups' \
             ./ root@$VPS_HOST:/opt/$APP_NAME/
 
           ssh root@$VPS_HOST "cd /opt/$APP_NAME && \
@@ -87,11 +92,13 @@ jobs:
         env:
           APP_NAME: ${{ inputs.app_name }}
           HEALTH_ENDPOINT: ${{ inputs.health_endpoint }}
+          HEALTH_URL: ${{ inputs.health_url }}
         run: |
           sleep 15
-          HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" "https://$APP_NAME.linderagroup.com$HEALTH_ENDPOINT" || echo "000")
+          URL="${HEALTH_URL:-https://$APP_NAME.linderagroup.com$HEALTH_ENDPOINT}"
+          HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" "$URL" || echo "000")
           if [ "$HTTP_CODE" = "200" ]; then
             echo "✓ Health check passed (HTTP $HTTP_CODE)"
           else
-            echo "⚠ Health check returned HTTP $HTTP_CODE (endpoint may not exist)"
+            echo "⚠ Health check returned HTTP $HTTP_CODE"
           fi
